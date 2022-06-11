@@ -1,0 +1,12 @@
+main: ${mainClass}
+
+name: ${name}
+description: ${description}
+version: ${version}
+
+api-version: 1.16
+website: ${url}
+author: ${author}
+
+depend:
+  - PlaceholderAPI
