@@ -3,7 +3,10 @@ package io.github.joshy56.dynamicplaceholders.hook;
 import com.google.common.base.Preconditions;
 import me.clip.placeholderapi.PlaceholderHook;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +17,8 @@ import java.util.*;
 /**
  * Created by joshy23 (justJoshy23 - joshy56) on 10/6/2022.
  */
-public class PluginPlaceholderExpansion extends PlaceholderExpansion {
+@SerializableAs("PluginPlaceholderExpansion")
+public class PluginPlaceholderExpansion extends PlaceholderExpansion implements ConfigurationSerializable {
     private final NamespacedKey identifier;
     private final String version, author;
     private final Map<String, PlaceholderHook> placeholdersProcessors;
@@ -56,8 +60,13 @@ public class PluginPlaceholderExpansion extends PlaceholderExpansion {
     }
 
     @Override
+    public boolean persist() {
+        return true;
+    }
+
+    @Override
     public @NotNull List<String> getPlaceholders() {
-        return placeholdersProcessors.keySet().stream().toList();
+        return new ArrayList<>(placeholdersProcessors.keySet());
     }
 
     public Map<String, PlaceholderHook> getPlaceholdersProcessors() {
@@ -82,5 +91,14 @@ public class PluginPlaceholderExpansion extends PlaceholderExpansion {
                         }
                 )
                 .orElse(null);
+    }
+
+    @Override
+    public @NotNull Map<String, Object> serialize() {
+        Map<String, Object> args = new LinkedHashMap<>();
+        args.put("plugin", getRequiredPlugin());
+        args.put("identifier", getIdentifier());
+        args.put("placeholders", getPlaceholdersProcessors());
+        return args;
     }
 }
