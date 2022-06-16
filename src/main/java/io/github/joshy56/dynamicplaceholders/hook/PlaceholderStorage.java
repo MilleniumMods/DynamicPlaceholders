@@ -73,6 +73,32 @@ public class PlaceholderStorage {
                 expansions.put(expansion.getIdentifier(), expansion)
         ).ifPresent(PlaceholderExpansion::unregister);
         expansion.register();
+
+        upsertExpansion(expansion.getIdentifier(), expansion);
+
+        return this;
+    }
+
+    public PlaceholderStorage addPlaceholder(@NotNull final String expansionIdentifier, @NotNull final String placeholderIdentifier, @NotNull final SerializablePlaceholder placeholder){
+        Preconditions.checkArgument(
+                !Strings.isNullOrEmpty(expansionIdentifier),
+                "Please, choose a not-null or not-empty expansion identifier..."
+        );
+        Preconditions.checkArgument(
+                !Strings.isNullOrEmpty(placeholderIdentifier),
+                "Please, choose a not-null or not-empty placeholder identifier..."
+        );
+        Preconditions.checkNotNull(
+                placeholder,
+                "Please, choose a not-null placeholder..."
+        );
+        PluginPlaceholderExpansion expansion = getExpansions().get(expansionIdentifier);
+        if(expansion == null)
+            expansion = new PluginPlaceholderExpansion(plugin, "environmental");
+        expansion.getPlaceholdersProcessors().put(placeholderIdentifier, placeholder);
+
+        upsertExpansion(expansionIdentifier, expansion);
+
         return this;
     }
 
@@ -88,7 +114,30 @@ public class PlaceholderStorage {
                             expansions.remove(expansionIdentifier);
                         }
                 );
+
+        upsertExpansion(expansionIdentifier, null);
+
         return this;
+    }
+
+    protected void upsertExpansion(@NotNull String expansionIdentifier, @Nullable PluginPlaceholderExpansion expansion){
+        Preconditions.checkArgument(
+                !Strings.isNullOrEmpty(expansionIdentifier),
+                "Please, choose a not-null or not-empty expansion identifier..."
+        );
+        if(expansion != null)
+            Preconditions.checkArgument(
+                    expansionIdentifier.equalsIgnoreCase(expansion.getIdentifier()),
+                    "Expansion identifier don't matches with identifier of expansion..."
+            );
+
+        Configuration config = plugin.getConfig();
+        ConfigurationSection expansionsSection = config.getConfigurationSection("expansions");
+        if(expansionsSection == null)
+            expansionsSection = config.createSection("expansions");
+        expansionsSection.set(expansionIdentifier, expansion);
+        config.set("expansions", expansionsSection);
+        plugin.saveConfig();
     }
 
     PlaceholderStorage migrateTo(@NotNull final Configuration backend) {

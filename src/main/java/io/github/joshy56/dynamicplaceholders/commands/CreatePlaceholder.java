@@ -50,14 +50,19 @@ public class CreatePlaceholder extends Command {
                 " ",
                 Arrays.copyOfRange(args, 1, args.length)
         );
-        SerializablePlaceholder placeholder = new SerializablePlaceholder(value);
+        /*SerializablePlaceholder placeholder = new SerializablePlaceholder(value);
         plugin.getOwnExpansion().getPlaceholdersProcessors().put(
                 identifier,
                 placeholder
+        );*/
+        plugin.getPlaceholderStorage().addPlaceholder(
+                plugin.getOwnExpansion().getIdentifier(),
+                identifier,
+                new SerializablePlaceholder(value)
         );
         sender.sendMessage(
                 Component.text(
-                        "Placeholder '" + identifier + "' y valor '" + value + "' creado correctamente",
+                        "Placeholder '" + identifier + "' y valor '" + value + "' creado correctamente, usable como %" + plugin.getOwnExpansion().getIdentifier() + "_" + identifier + "%",
                         NamedTextColor.GREEN
                 )
         );

@@ -23,7 +23,7 @@ import java.util.*;
 public class PluginPlaceholderExpansion extends PlaceholderExpansion implements ConfigurationSerializable {
     private final NamespacedKey identifier;
     private final PluginDescriptionFile description;
-    private final Map<String, PlaceholderHook> placeholdersProcessors;
+    private final Map<String, SerializablePlaceholder> placeholdersProcessors;
 
     public PluginPlaceholderExpansion(@NotNull Plugin namespace, @NotNull String key) {
         identifier = Preconditions.checkNotNull(
@@ -67,7 +67,7 @@ public class PluginPlaceholderExpansion extends PlaceholderExpansion implements 
         return new ArrayList<>(placeholdersProcessors.keySet());
     }
 
-    public Map<String, PlaceholderHook> getPlaceholdersProcessors() {
+    public Map<String, SerializablePlaceholder> getPlaceholdersProcessors() {
         return placeholdersProcessors;
     }
 

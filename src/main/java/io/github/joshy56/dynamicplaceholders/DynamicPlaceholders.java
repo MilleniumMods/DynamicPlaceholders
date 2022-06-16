@@ -43,7 +43,7 @@ public class DynamicPlaceholders extends JavaPlugin {
         placeholderStorage.loadAll();
         if(getOwnExpansion() == null)
             placeholderStorage.add(
-                    new PluginPlaceholderExpansion(this, "environmental")
+                    new PluginPlaceholderExpansion(this, expansionIdentifier.value())
             );
         adventure.console().sendMessage(
                 Component.text(
