@@ -1,6 +1,7 @@
 package io.github.joshy56.dynamicplaceholders.hook;
 
 import com.google.common.base.Preconditions;
+import io.github.joshy56.dynamicplaceholders.exceptions.InvalidPlaceholderExpansion;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.PlaceholderHook;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -46,5 +47,17 @@ public class SerializablePlaceholder extends PlaceholderHook implements Configur
         Map<String, Object> args = new LinkedHashMap<>();
         args.put("value", getValue());
         return args;
+    }
+
+    public static SerializablePlaceholder deserialize(@NotNull final Map<String, Object> args) throws InvalidPlaceholderExpansion {
+        String value;
+        try{
+            value = args.get("value").toString();
+        } catch (NullPointerException e) {
+            throw new InvalidPlaceholderExpansion("value is not defined", e);
+        } catch (ClassCastException e) {
+            throw new InvalidPlaceholderExpansion("value is of wrong type", e);
+        }
+        return new SerializablePlaceholder(value);
     }
 }

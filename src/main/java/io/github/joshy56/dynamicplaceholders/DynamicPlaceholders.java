@@ -40,8 +40,7 @@ public class DynamicPlaceholders extends JavaPlugin {
     @Override
     public void onEnable() {
         adventure = BukkitAudiences.create(this);
-        placeholderStorage
-                .loadAll();
+        placeholderStorage.loadAll();
         if(getOwnExpansion() == null)
             placeholderStorage.add(
                     new PluginPlaceholderExpansion(this, "environmental")
