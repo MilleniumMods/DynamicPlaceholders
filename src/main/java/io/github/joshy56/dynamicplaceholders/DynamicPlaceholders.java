@@ -1,6 +1,7 @@
 package io.github.joshy56.dynamicplaceholders;
 
 import io.github.joshy56.dynamicplaceholders.commands.CreatePlaceholder;
+import io.github.joshy56.dynamicplaceholders.commands.DynamicPlaceholdersCommand;
 import io.github.joshy56.dynamicplaceholders.hook.PlaceholderStorage;
 import io.github.joshy56.dynamicplaceholders.hook.PluginPlaceholderExpansion;
 import io.github.joshy56.dynamicplaceholders.hook.SerializablePlaceholder;
@@ -51,7 +52,9 @@ public class DynamicPlaceholders extends JavaPlugin {
                         NamedTextColor.GOLD
                 )
         );
-        Bukkit.getCommandMap().register("createph", new CreatePlaceholder(this));
+        DynamicPlaceholdersCommand mainCommand = new DynamicPlaceholdersCommand();
+        mainCommand.register(getName(), new CreatePlaceholder(this));
+        Bukkit.getCommandMap().register(getName(), mainCommand);
     }
 
     @Override
