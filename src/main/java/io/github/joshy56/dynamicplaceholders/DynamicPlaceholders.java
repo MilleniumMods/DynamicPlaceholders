@@ -5,17 +5,13 @@ import io.github.joshy56.dynamicplaceholders.commands.DynamicPlaceholdersCommand
 import io.github.joshy56.dynamicplaceholders.hook.PlaceholderStorage;
 import io.github.joshy56.dynamicplaceholders.hook.PluginPlaceholderExpansion;
 import io.github.joshy56.dynamicplaceholders.hook.SerializablePlaceholder;
-import me.clip.placeholderapi.PlaceholderAPI;
-import me.clip.placeholderapi.PlaceholderAPIPlugin;
-import me.clip.placeholderapi.expansion.cloud.CloudExpansion;
-import me.clip.placeholderapi.expansion.manager.CloudExpansionManager;
+import io.github.joshy56.dynamicplaceholders.util.Storage;
 import me.clip.placeholderapi.libs.kyori.adventure.platform.bukkit.BukkitAudiences;
 import me.clip.placeholderapi.libs.kyori.adventure.text.Component;
 import me.clip.placeholderapi.libs.kyori.adventure.text.format.NamedTextColor;
-import me.clip.placeholderapi.libs.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.audience.Audience;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,6 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class DynamicPlaceholders extends JavaPlugin {
     private final PlaceholderStorage placeholderStorage;
+    private Storage commands;
     private BukkitAudiences adventure;
     private final NamespacedKey expansionIdentifier;
 
@@ -36,13 +33,14 @@ public class DynamicPlaceholders extends JavaPlugin {
     public void onLoad() {
         ConfigurationSerialization.registerClass(PluginPlaceholderExpansion.class);
         ConfigurationSerialization.registerClass(SerializablePlaceholder.class);
+        commands = new Storage(this, "commands.yml").reload();
     }
 
     @Override
     public void onEnable() {
         adventure = BukkitAudiences.create(this);
         placeholderStorage.loadAll();
-        if(getOwnExpansion() == null)
+        if (getOwnExpansion() == null)
             placeholderStorage.add(
                     new PluginPlaceholderExpansion(this, expansionIdentifier.value())
             );
@@ -52,8 +50,9 @@ public class DynamicPlaceholders extends JavaPlugin {
                         NamedTextColor.GOLD
                 )
         );
-        DynamicPlaceholdersCommand mainCommand = new DynamicPlaceholdersCommand();
-        mainCommand.register(getName(), new CreatePlaceholder(this));
+        DynamicPlaceholdersCommand mainCommand = new DynamicPlaceholdersCommand(getCommands());
+        CreatePlaceholder createPlaceholder = new CreatePlaceholder(this, getCommands());
+        mainCommand.register(getName(), createPlaceholder);
         Bukkit.getCommandMap().register(getName(), mainCommand);
     }
 
@@ -73,7 +72,11 @@ public class DynamicPlaceholders extends JavaPlugin {
         return placeholderStorage;
     }
 
-    public PluginPlaceholderExpansion getOwnExpansion(){
+    public PluginPlaceholderExpansion getOwnExpansion() {
         return getPlaceholderStorage().getExpansions().get(expansionIdentifier.asString());
+    }
+
+    public Storage getCommands() {
+        return commands;
     }
 }

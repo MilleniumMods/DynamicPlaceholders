@@ -4,12 +4,11 @@ import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsManager;
 import com.destroystokyo.paper.event.server.ServerExceptionEvent;
 import com.destroystokyo.paper.exception.ServerCommandException;
-import com.destroystokyo.paper.exception.ServerTabCompleteException;
 import com.google.common.base.Strings;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import io.github.joshy56.dynamicplaceholders.util.AdvancedBooleans;
+import io.github.joshy56.dynamicplaceholders.util.Storage;
+import org.apache.commons.lang.BooleanUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -26,11 +25,12 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by joshy23 (justJoshy23 - joshy56) on 16/6/2022.
  */
-public abstract class CompoundCommand extends Command implements CommandMap {
+public abstract class CompoundCommand extends TranslatableCommand implements CommandMap {
     private final Map<String, Command> knownCommands;
 
     /**
@@ -48,8 +48,8 @@ public abstract class CompoundCommand extends Command implements CommandMap {
         COMMAND_ARGUMENT_PATTERN = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']+)*'");
     }
 
-    protected CompoundCommand(@NotNull String name, @NotNull String description, @NotNull String usageMessage, @NotNull List<String> aliases) {
-        super(name, description, usageMessage, aliases);
+    protected CompoundCommand(@NotNull String name, @NotNull String description, @NotNull String usageMessage, @NotNull List<String> aliases, @NotNull final Storage storage) {
+        super(name, description, usageMessage, aliases, storage);
         knownCommands = new HashMap<>();
     }
 
@@ -60,7 +60,12 @@ public abstract class CompoundCommand extends Command implements CommandMap {
         if (Strings.isNullOrEmpty(alias))
             return false;
 
-        if (getAliases().stream().noneMatch(alias::equalsIgnoreCase))
+        if (
+                AdvancedBooleans.xor(
+                        getAliases().stream().noneMatch(alias::equalsIgnoreCase),
+                        !alias.equalsIgnoreCase(getLabel())
+                )
+        )
             return false;
 
         String cmdLine = String.join(" ", args);
@@ -71,6 +76,11 @@ public abstract class CompoundCommand extends Command implements CommandMap {
             return execute(sender);
 
         return dispatch(sender, cmdLine);
+    }
+
+    @Override
+    public boolean execute(@NotNull CommandSender sender, @NotNull List<String> args) {
+        return dispatch(sender, String.join(" ", args));
     }
 
     abstract protected boolean execute(@NotNull CommandSender sender);
@@ -95,9 +105,10 @@ public abstract class CompoundCommand extends Command implements CommandMap {
         Bukkit.getConsoleSender()
                 .sendMessage("Processed args=" + Arrays.toString(complexArgs.toArray(new String[0])));
         if (complexArgs.isEmpty()) {
-            List<String> aliases = new ArrayList<>(tabComplete(sender, location));
-            aliases.addAll(getKnownCommands().keySet());
-            return aliases;
+            return new ImmutableList.Builder<String>()
+                    .addAll(tabComplete(sender, location))
+                    .addAll(tabComplete(sender, cmdLine, location))
+                    .build();
         }
 
         return Optional
@@ -107,15 +118,33 @@ public abstract class CompoundCommand extends Command implements CommandMap {
 
     abstract protected @NotNull List<String> tabComplete(@NotNull CommandSender sender, @Nullable Location location);
 
+/*    public @NotNull CompoundCommand setMessagesSection(@NotNull ConfigurationSection section) {
+        Preconditions.checkNotNull(
+                section,
+                "Please choose a not-null section..."
+        );
+
+        if (getCommandMap() instanceof CompoundCommand) {
+            ((CompoundCommand) getCommandMap()).setMessagesSection(section);
+            return this;
+        }
+
+        this.messages = section;
+        return this;
+    }*/
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void registerAll(@NotNull String fallbackPrefix, @NotNull List<Command> commands) {
-        if (commands != null)
-            for (Command c : commands) {
-                register(fallbackPrefix, c);
-            }
+        if (commands == null || commands.isEmpty())
+            return;
+
+        for (Command command :
+                commands) {
+            register(fallbackPrefix, command);
+        }
     }
 
     /**
@@ -131,23 +160,19 @@ public abstract class CompoundCommand extends Command implements CommandMap {
      */
     @Override
     public boolean register(@NotNull String label, @NotNull String fallbackPrefix, @NotNull Command command) {
-        command.timings = co.aikar.timings.TimingsManager.getCommandTiming(fallbackPrefix, command); // Paper
-        label = label.toLowerCase(java.util.Locale.ENGLISH).trim();
-        fallbackPrefix = fallbackPrefix.toLowerCase(java.util.Locale.ENGLISH).trim();
-        boolean registered = register(label, command, false, fallbackPrefix);
+        command.timings = TimingsManager.getCommandTiming(fallbackPrefix, command); // Paper
+        label = label.toLowerCase().trim();
+        String finalFallbackPrefix = fallbackPrefix.toLowerCase().trim();
+        boolean registered = register(label, command, false, finalFallbackPrefix);
 
-        Iterator<String> iterator = command.getAliases().iterator();
-        while (iterator.hasNext()) {
-            if (!register(iterator.next(), command, true, fallbackPrefix)) {
-                iterator.remove();
-            }
-        }
+        List<String> aliases = command.getAliases();
+        aliases.add(label);
+        aliases.removeIf(alias -> !register(alias, command, true, finalFallbackPrefix));
+        command.setAliases(aliases);
 
         // If we failed to register under the real name, we need to set the command label to the direct address
-        if (!registered) {
-            command.setLabel(fallbackPrefix + ":" + label);
-            command.setAliases(Lists.asList(command.getLabel(), command.getAliases().toArray(new String[0])));
-        }
+        if (!registered)
+            command.setLabel(finalFallbackPrefix + ":" + label);
 
         // Register to us so further updates of the commands label and aliases are postponed until its re-registered
         command.register(this);
@@ -168,28 +193,19 @@ public abstract class CompoundCommand extends Command implements CommandMap {
      */
     private synchronized boolean register(@NotNull String label, @NotNull Command command, boolean isAlias, @NotNull String fallbackPrefix) {
         knownCommands.put(fallbackPrefix + ":" + label, command);
-        if ((command instanceof BukkitCommand || isAlias) && knownCommands.containsKey(label)) {
-            // Request is for an alias/fallback command and it conflicts with
-            // a existing command or previous alias ignore it
-            // Note: This will mean it gets removed from the commands list of active aliases
+
+        if ((command instanceof BukkitCommand || isAlias) && knownCommands.containsKey(label))
             return false;
-        }
 
-        boolean registered = true;
-
-        // If the command exists but is an alias we overwrite it, otherwise we return
-        Command conflict = knownCommands.get(label);
-        if (conflict != null && conflict.getLabel().equals(label)) {
+        Command conflict = getCommand(label);
+        if (conflict != null && conflict.getLabel().equalsIgnoreCase(label))
             return false;
-        }
 
-        if (!isAlias) {
+        if (!isAlias)
             command.setLabel(label);
-            command.setAliases(Lists.asList(command.getLabel(), command.getAliases().toArray(new String[0])));
-        }
         knownCommands.put(label, command);
 
-        return registered;
+        return true;
     }
 
     @Override
@@ -216,11 +232,13 @@ public abstract class CompoundCommand extends Command implements CommandMap {
         try {
             try (Timing ignored = target.timings.startTiming()) { // Paper - use try with resources
                 // Note: we don't return the result of target.execute as that's success / failure, we return handled (true) or not handled (false)
+                Bukkit.getConsoleSender()
+                        .sendMessage("CommandAlias=" + label + " Registered=" + target.isRegistered() + " CommandAliases=" + Arrays.toString(target.getAliases().toArray()));
                 target.execute(sender, label, args.subList(1, args.size()).toArray(new String[0]));
             } // target.timings.stopTiming(); // Spigot // Paper
         } catch (CommandException ex) {
             new ServerExceptionEvent(new ServerCommandException(ex, target, sender, args.toArray(new String[0]))).callEvent(); // Paper
-            //target.timings.stopTiming(); // Spigot // Paper
+            // target.timings.stopTiming(); // Spigot // Paper
             throw ex;
         } catch (Throwable ex) {
             //target.timings.stopTiming(); // Spigot // Paper
@@ -232,6 +250,8 @@ public abstract class CompoundCommand extends Command implements CommandMap {
         // return true as command was handled
         return true;
     }
+
+
 
     @Override
     public synchronized void clearCommands() {
