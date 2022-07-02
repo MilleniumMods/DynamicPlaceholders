@@ -2,8 +2,8 @@ package io.github.joshy56.dynamicplaceholders.commands;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import io.github.joshy56.dynamicplaceholders.util.AdvancedBooleans;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,19 +64,45 @@ public abstract class ExtendedCommand extends Command {
         if (Strings.isNullOrEmpty(alias))
             return false;
 
-        if (
-                AdvancedBooleans.xor(
-                        getAliases().stream().noneMatch(alias::equalsIgnoreCase),
-                        !alias.equalsIgnoreCase(getLabel())
-                )
-        )
+        Bukkit.getConsoleSender().sendMessage(
+                new String[]{
+                        "DynamicPlaceholders:Debug of:",
+                        "Class '" + getClass().getSimpleName() + "' on ",
+                        "Method: 'execute' with 3 params and his values ",
+                        "Param: 'sender' = " + sender.getClass().getSimpleName(),
+                        "Param: 'alias' = " + alias,
+                        "Param: 'args' = " + Arrays.toString(args)
+                }
+        );
+
+        boolean aliasesNotMatch = getAliases().stream().noneMatch(alias::equalsIgnoreCase),
+                aliasNotMatch = !alias.equalsIgnoreCase(getLabel());
+
+        Bukkit.getConsoleSender().sendMessage(
+                new String[]{
+                        "DynamicPlaceholders:Debug of:",
+                        "Class '" + getClass().getSimpleName() + "' on ",
+                        "Method: 'execute' with 3 params and his values ",
+                        "Param: 'sender' = " + sender,
+                        "Param: 'alias' = " + alias,
+                        "Param: 'args' = " + Arrays.toString(args),
+                        "Value of LocalVar 'aliasesNotMatch' = " + aliasesNotMatch,
+                        "Value of LocalVar 'aliasNotMatch' = " + aliasNotMatch
+                }
+        );
+
+        if(aliasNotMatch && aliasesNotMatch)
             return false;
 
         List<String> complexArgs = getArgumentsOf(String.join(" ", args));
         return execute(sender, complexArgs);
     }
 
-    public abstract boolean execute(@NotNull CommandSender sender, @NotNull List<String> args);
+    abstract protected boolean execute(@NotNull CommandSender sender, @NotNull List<String> args);
+
+    abstract protected boolean execute(@NotNull CommandSender sender);
+
+    abstract protected @NotNull List<String> tabComplete(@NotNull CommandSender sender, @Nullable Location location);
 
     protected List<String> getArgumentsOf(@NotNull final String commandLine) {
         ImmutableList.Builder<String> argsBuilder = ImmutableList.builder();

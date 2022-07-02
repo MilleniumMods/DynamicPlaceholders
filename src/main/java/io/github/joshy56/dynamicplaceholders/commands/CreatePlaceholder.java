@@ -8,10 +8,12 @@ import io.papermc.paper.text.PaperComponents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -72,6 +74,16 @@ public class CreatePlaceholder extends TranslatableCommand {
                 )
         );
         return true;
+    }
+
+    @Override
+    protected boolean execute(@NotNull CommandSender sender) {
+        return true;
+    }
+
+    @Override
+    protected @NotNull List<String> tabComplete(@NotNull CommandSender sender, @Nullable Location location) {
+        return Lists.newArrayList("<placeholderID> <placeholderValue>");
     }
 
     @Override
