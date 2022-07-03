@@ -2,9 +2,7 @@ package io.github.joshy56.dynamicplaceholders.commands;
 
 import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsManager;
-import com.google.common.base.Strings;
 import io.github.joshy56.dynamicplaceholders.util.Storage;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandException;
@@ -31,67 +29,18 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
 
     @Override
     protected boolean execute(@NotNull CommandSender sender, @NotNull List<String> args) {
-
-        Bukkit.getConsoleSender().sendMessage(
-                new String[]{
-                        "DynamicPlaceholders:Debug of:",
-                        "Class '" + getClass().getSimpleName() + "' on ",
-                        "Method: 'execute' with 2 params and his values ",
-                        "Param: 'sender' = " + sender.getClass().getSimpleName(),
-                        "Param: 'args' = " + Arrays.toString(args.toArray())
-                }
-        );
-
-        if(args.isEmpty())
+        if (args.isEmpty())
             return execute(sender);
 
         return dispatch(sender, args);
     }
 
     @Override
-    public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-        return tabComplete(sender, alias, args, null);
-    }
-
-    @Override
-    public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args, @Nullable Location location) throws IllegalArgumentException {
-        return tabComplete(
-                sender,
-                alias,
-                getArgumentsOf(String.join(" ", args)),
-                location
-        );
-    }
-
-    protected @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull List<String> args, @Nullable Location location) {
-        if(Strings.isNullOrEmpty(alias))
-            return new ArrayList<>(0);
-
-        Bukkit.getConsoleSender().sendMessage(
-                new String[]{
-                        "DynamicPlaceholders:Debug of:",
-                        "Class '" + getClass().getSimpleName() + "' on ",
-                        "Method: 'tabComplete' with 4 params and his values ",
-                        "Param: 'sender' = " + sender.getClass().getSimpleName(),
-                        "Param: 'alias' = " + alias,
-                        "Param: 'args' = " + Arrays.toString(args.toArray()),
-                        "Param: 'location' = " + (location == null ? "undefined" : location.toString())
-                }
-        );
-        /**
-        if(args.isEmpty())
-            return tabComplete(sender, location);
-
-        if(
-                !alias.equalsIgnoreCase(getLabel()) &&
-                        getAliases().stream().noneMatch(alias::equalsIgnoreCase)
-        )
-            return new ArrayList<>();
-
-        return Optional.ofNullable(tabComplete(sender, args, location))
-                .orElse(new ArrayList<>(0));
-         */
-        return new ArrayList<>(0);
+    protected @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull List<String> args, @Nullable Location location) {
+        List<String> aliases = new ArrayList<>(mapTabComplete(sender, args, location));
+        if (args.isEmpty())
+            aliases.addAll(tabComplete(sender, location));
+        return aliases;
     }
 
     @Override
@@ -108,36 +57,13 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
         command.timings = TimingsManager.getCommandTiming(finalFallbackPrefix, command);
         alias = alias.toLowerCase().trim();
 
-        Bukkit.getConsoleSender().sendMessage(
-                new String[]{
-                        "DynamicPlaceholders:Debug of:",
-                        "Class '" + getClass().getSimpleName() + "' on ",
-                        "Method: 'register' with 3 params and his values ",
-                        "Param: 'fallbackPrefix' = " + finalFallbackPrefix,
-                        "Param: 'alias' = " + alias,
-                        "Param: 'command' = " + command,
-                        "Value of 'aliases' on Param 'command' = " + Arrays.toString(command.getAliases().toArray())
-                }
-        );
-
         boolean registered = register(alias, finalFallbackPrefix, false, command);
 
         command.getAliases().removeIf(a -> !register(a, finalFallbackPrefix, true, command));
 
-        Bukkit.getConsoleSender().sendMessage(
-                new String[]{
-                        "DynamicPlaceholders:Debug of:",
-                        "Class '" + getClass().getSimpleName() + "' on ",
-                        "Method: 'register' with 3 params and his values ",
-                        "Param: 'fallbackPrefix' = " + finalFallbackPrefix,
-                        "Param: 'alias' = " + alias,
-                        "Param: 'command' = " + command,
-                        "Value of 'aliases' on Param 'command' = " + Arrays.toString(command.getAliases().toArray())
-                }
-        );
-
         if (!registered)
             command.setLabel(finalFallbackPrefix + ":" + alias);
+        command.register(this);
 
         return registered;
     }
@@ -167,32 +93,10 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
 
     @Override
     public boolean dispatch(@NotNull CommandSender sender, @NotNull String commandLine) throws CommandException {
-
-        Bukkit.getConsoleSender().sendMessage(
-                new String[]{
-                        "DynamicPlaceholders:Debug of:",
-                        "Class '" + getClass().getSimpleName() + "' on ",
-                        "Method: 'dispatch' with 2 params and his values ",
-                        "Param: 'sender' = " + sender.getClass().getSimpleName(),
-                        "Param: 'commandLine' = " + commandLine
-                }
-        );
-
         return dispatch(sender, getArgumentsOf(commandLine));
     }
 
     protected boolean dispatch(CommandSender sender, List<String> args) {
-
-        Bukkit.getConsoleSender().sendMessage(
-                new String[]{
-                        "DynamicPlaceholders:Debug of:",
-                        "Class '" + getClass().getSimpleName() + "' on ",
-                        "Method: 'dispatch' with 2 params and his values ",
-                        "Param: 'sender' = " + sender.getClass().getSimpleName(),
-                        "Param: 'args' = " + Arrays.toString(args.toArray())
-                }
-        );
-
         if (args.isEmpty())
             return false;
 
@@ -208,7 +112,13 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
             target.execute(
                     sender,
                     args.get(0),
-                    String.join(" ", subArgs).split(" ")
+                    subArgs.stream()
+                            .filter(arg -> !arg.matches(COMMAND_ARGUMENT_PATTERN.pattern()))
+                            .map(
+                                    arg -> "\"" + arg + "\""
+                            )
+                            .collect(Collectors.joining(" "))
+                            .split(" ")
             );
         }
         return true;
@@ -234,35 +144,22 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
 
     @Override
     public @Nullable List<String> tabComplete(@NotNull CommandSender sender, @NotNull String commandLine, @Nullable Location location) throws IllegalArgumentException {
-        return tabComplete(sender, getArgumentsOf(commandLine), location);
+        return mapTabComplete(sender, getArgumentsOf(commandLine), location);
     }
 
     /**
      * Command Map
-     * @param sender
-     * @param args
-     * @param location
+     *
+     * @param
+     * @param
+     * @param
      * @return
      */
-    public @Nullable List<String> tabComplete(@NotNull CommandSender sender, @NotNull List<String> args, @Nullable Location location) {
+    public @NotNull List<String> mapTabComplete(@NotNull CommandSender sender, @NotNull List<String> args, @Nullable Location location) {
         if (args.isEmpty())
             return getKnownCommands()
                     .entrySet()
                     .stream()
-                    .filter(
-                            entry -> entry.getValue().testPermissionSilent(sender)
-                    )
-                    .map(Map.Entry::getKey)
-                    .sorted(String.CASE_INSENSITIVE_ORDER)
-                    .collect(Collectors.toList());
-
-        if (args.size() == 1)
-            return getKnownCommands()
-                    .entrySet()
-                    .stream()
-                    .filter(
-                            entry -> StringUtil.startsWithIgnoreCase(entry.getKey(), args.get(0))
-                    )
                     .filter(
                             entry -> entry.getValue().testPermissionSilent(sender)
                     )
@@ -280,12 +177,32 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
                             return command.tabComplete(
                                     sender,
                                     args.get(0),
-                                    String.join(" ", subArgs).split(" "),
+                                    subArgs.stream()
+                                            .filter(arg -> !arg.matches(COMMAND_ARGUMENT_PATTERN.pattern()))
+                                            .map(
+                                                    arg -> "\"" + arg + "\""
+                                            )
+                                            .collect(Collectors.joining(" "))
+                                            .split(" "),
                                     location
                             );
                         }
                 )
-                .orElse(new ArrayList<>(0));
+                .orElse(
+
+                        getKnownCommands()
+                                .entrySet()
+                                .stream()
+                                .filter(
+                                        entry -> StringUtil.startsWithIgnoreCase(entry.getKey(), args.get(0))
+                                )
+                                .filter(
+                                        entry -> entry.getValue().testPermissionSilent(sender)
+                                )
+                                .map(Map.Entry::getKey)
+                                .sorted(String.CASE_INSENSITIVE_ORDER)
+                                .collect(Collectors.toList())
+                );
     }
 
     @Override

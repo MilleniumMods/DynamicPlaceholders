@@ -10,3 +10,8 @@ author: ${author}
 
 depend:
   - PlaceholderAPI
+
+commands: {
+            p:
+
+}

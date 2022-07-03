@@ -1,7 +1,7 @@
 package io.github.joshy56.dynamicplaceholders;
 
 import io.github.joshy56.dynamicplaceholders.commands.CreatePlaceholder;
-import io.github.joshy56.dynamicplaceholders.commands.DynamicPlaceholdersCommand;
+import io.github.joshy56.dynamicplaceholders.commands.compounds.DynamicPlaceholdersCommand;
 import io.github.joshy56.dynamicplaceholders.hook.PlaceholderStorage;
 import io.github.joshy56.dynamicplaceholders.hook.PluginPlaceholderExpansion;
 import io.github.joshy56.dynamicplaceholders.hook.SerializablePlaceholder;
@@ -11,11 +11,8 @@ import me.clip.placeholderapi.libs.kyori.adventure.text.Component;
 import me.clip.placeholderapi.libs.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Arrays;
 
 /**
  * Created by joshy23 (justJoshy23 - joshy56) on 10/6/2022.

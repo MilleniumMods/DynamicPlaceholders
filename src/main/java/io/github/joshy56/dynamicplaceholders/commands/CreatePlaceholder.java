@@ -82,6 +82,11 @@ public class CreatePlaceholder extends TranslatableCommand {
     }
 
     @Override
+    protected @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull List<String> args, @Nullable Location location) {
+        return tabComplete(sender, location);
+    }
+
+    @Override
     protected @NotNull List<String> tabComplete(@NotNull CommandSender sender, @Nullable Location location) {
         return Lists.newArrayList("<placeholderID> <placeholderValue>");
     }

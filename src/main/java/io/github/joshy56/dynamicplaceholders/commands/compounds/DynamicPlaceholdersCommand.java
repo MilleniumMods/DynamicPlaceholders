@@ -1,6 +1,7 @@
-package io.github.joshy56.dynamicplaceholders.commands;
+package io.github.joshy56.dynamicplaceholders.commands.compounds;
 
 import io.github.joshy56.dynamicplaceholders.DynamicPlaceholders;
+import io.github.joshy56.dynamicplaceholders.commands.CompoundCommand;
 import io.github.joshy56.dynamicplaceholders.util.Storage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
