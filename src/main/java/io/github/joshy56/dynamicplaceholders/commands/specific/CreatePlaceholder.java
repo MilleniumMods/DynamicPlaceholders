@@ -1,7 +1,8 @@
-package io.github.joshy56.dynamicplaceholders.commands;
+package io.github.joshy56.dynamicplaceholders.commands.specific;
 
 import com.google.common.collect.Lists;
 import io.github.joshy56.dynamicplaceholders.DynamicPlaceholders;
+import io.github.joshy56.dynamicplaceholders.commands.TranslatableCommand;
 import io.github.joshy56.dynamicplaceholders.hook.SerializablePlaceholder;
 import io.github.joshy56.dynamicplaceholders.util.Storage;
 import io.papermc.paper.text.PaperComponents;

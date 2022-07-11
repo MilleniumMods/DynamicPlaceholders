@@ -47,4 +47,8 @@ public abstract class TranslatableCommand extends ExtendedCommand {
         return isRegistered() ? storage.getStorage().getConfigurationSection(getName()) : null;
     }
 
+    public void reloadStorage(){
+        storage.reload();
+    }
+
 }

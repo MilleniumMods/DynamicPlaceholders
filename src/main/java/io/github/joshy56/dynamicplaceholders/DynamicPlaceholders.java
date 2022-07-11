@@ -1,6 +1,6 @@
 package io.github.joshy56.dynamicplaceholders;
 
-import io.github.joshy56.dynamicplaceholders.commands.CreatePlaceholder;
+import io.github.joshy56.dynamicplaceholders.commands.specific.CreatePlaceholder;
 import io.github.joshy56.dynamicplaceholders.commands.compounds.DynamicPlaceholdersCommand;
 import io.github.joshy56.dynamicplaceholders.hook.PlaceholderStorage;
 import io.github.joshy56.dynamicplaceholders.hook.PluginPlaceholderExpansion;

@@ -210,4 +210,14 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
         return commands;
     }
 
+    @Override
+    public void reloadStorage() {
+        super.reloadStorage();
+        getKnownCommands().values()
+                .stream()
+                .filter(command -> command instanceof TranslatableCommand)
+                .map(command -> (TranslatableCommand) command)
+                .forEach(TranslatableCommand::reloadStorage);
+    }
+
 }
