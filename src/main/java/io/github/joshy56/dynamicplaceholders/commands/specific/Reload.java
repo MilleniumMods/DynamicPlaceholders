@@ -70,7 +70,7 @@ public class Reload extends TranslatableCommand {
             messages.set("success", message);
             getStorage().getStorage().set(messages.getName(), messages);
             saveStorage();
-            getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + "success"));
+            getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + ".success"));
         }
 
         sender.sendMessage(

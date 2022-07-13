@@ -37,7 +37,7 @@ public class PlaceholdersAction extends CompoundCommand {
             messages.set("error.missed-action", message);
             getStorage().getStorage().set(messages.getName(), messages);
             saveStorage();
-            getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + "error.missed-action"));
+            getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + ".error.missed-action"));
         }
 
         sender.sendMessage(

@@ -29,12 +29,6 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
 
     @Override
     protected boolean execute(@NotNull CommandSender sender, @NotNull List<String> args) {
-        getStoragePlugin().getSLF4JLogger().warn(
-                String.format(
-                        "exe Args: '%s'",
-                        args
-                )
-        );
         if (args.isEmpty())
             return execute(sender);
 
@@ -103,12 +97,6 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
     }
 
     protected boolean dispatch(CommandSender sender, List<String> args) {
-        getStoragePlugin().getSLF4JLogger().warn(
-                String.format(
-                        "Args: '%s'",
-                        args
-                        )
-        );
         if (args.isEmpty())
             return false;
 
@@ -120,30 +108,16 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
             target.timings = TimingsManager.getCommandTiming(null, target);
 
         List<String> subArgs = args.subList(1, args.size());
-        getStoragePlugin().getSLF4JLogger().warn(
-                String.format(
-                        "SubArgs: '%s'",
-                        subArgs
-                )
-        );
-        String[] arraySubArgs = subArgs.stream()
-//                .filter(arg -> !arg.matches(COMMAND_ARGUMENT_PATTERN.pattern()))
-                .map(
-                        arg -> "\"" + arg + "\""
-                )
-                .collect(Collectors.joining(" "))
-                .split(" ");
-        getStoragePlugin().getSLF4JLogger().warn(
-                String.format(
-                        "ArraySubArgs: '%s'",
-                        (Object[]) arraySubArgs
-                )
-        );
         try (Timing ignored = target.timings.startTiming()) {
             target.execute(
                     sender,
                     args.get(0),
-                    arraySubArgs
+                    subArgs.stream()
+                            .map(
+                                    arg -> "\"" + arg + "\""
+                            )
+                            .collect(Collectors.joining(" "))
+                            .split(" ")
             );
         }
         return true;

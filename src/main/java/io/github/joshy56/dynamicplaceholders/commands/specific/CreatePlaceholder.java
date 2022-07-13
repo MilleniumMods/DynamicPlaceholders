@@ -53,7 +53,7 @@ public class CreatePlaceholder extends TranslatableCommand {
                 messages.set("error.missed-placeholder-id", message);
                 getStorage().getStorage().set(messages.getName(), messages);
                 saveStorage();
-                getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + "error.missed-placeholder-id"));
+                getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + ".error.missed-placeholder-id"));
             }
 
             sender.sendMessage(
@@ -72,7 +72,7 @@ public class CreatePlaceholder extends TranslatableCommand {
                 messages.set("error.missed-placeholder-value", message);
                 getStorage().getStorage().set(messages.getName(), messages);
                 saveStorage();
-                getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + "error.missed-placeholder-value"));
+                getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + ".error.missed-placeholder-value"));
             }
 
             sender.sendMessage(
@@ -98,7 +98,7 @@ public class CreatePlaceholder extends TranslatableCommand {
             messages.set("success", message);
             getStorage().getStorage().set(messages.getName(), messages);
             saveStorage();
-            getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + "success"));
+            getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + ".success"));
         }
 
         sender.sendMessage(
