@@ -3,6 +3,7 @@ package io.github.joshy56.dynamicplaceholders.commands;
 import io.github.joshy56.dynamicplaceholders.util.Storage;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,6 +50,18 @@ public abstract class TranslatableCommand extends ExtendedCommand {
 
     public void reloadStorage(){
         storage.reload();
+    }
+
+    public void saveStorage(){
+        storage.save();
+    }
+
+    public Storage getStorage(){
+        return storage;
+    }
+
+    protected Plugin getStoragePlugin(){
+        return storage.getPlugin();
     }
 
 }

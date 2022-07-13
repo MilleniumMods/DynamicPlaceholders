@@ -1,7 +1,9 @@
 package io.github.joshy56.dynamicplaceholders;
 
+import io.github.joshy56.dynamicplaceholders.commands.compounds.PlaceholdersAction;
 import io.github.joshy56.dynamicplaceholders.commands.specific.CreatePlaceholder;
 import io.github.joshy56.dynamicplaceholders.commands.compounds.DynamicPlaceholdersCommand;
+import io.github.joshy56.dynamicplaceholders.commands.specific.Reload;
 import io.github.joshy56.dynamicplaceholders.hook.PlaceholderStorage;
 import io.github.joshy56.dynamicplaceholders.hook.PluginPlaceholderExpansion;
 import io.github.joshy56.dynamicplaceholders.hook.SerializablePlaceholder;
@@ -49,21 +51,8 @@ public class DynamicPlaceholders extends JavaPlugin {
                         NamedTextColor.GOLD
                 )
         );
-        DynamicPlaceholdersCommand mainCommand = new DynamicPlaceholdersCommand(getCommands());
-        CreatePlaceholder createPlaceholder = new CreatePlaceholder(this, getCommands());
-        mainCommand.register(getName(), createPlaceholder);
 
-        Bukkit.getConsoleSender().sendMessage(
-                new String[]{
-                        "DynamicPlaceholders:Debug of:",
-                        "Class '" + getClass().getSimpleName() + "' on",
-                        "Method: 'onEnable' with 0 params",
-                        "Local Variable: 'mainCommand' value of",
-                        "Method: 'knownCommands' = " + mainCommand.getKnownCommands()
-                }
-        );
-
-        Bukkit.getCommandMap().register(getName(), mainCommand);
+        setCommands();
     }
 
     @Override
@@ -86,7 +75,20 @@ public class DynamicPlaceholders extends JavaPlugin {
         return getPlaceholderStorage().getExpansions().get(expansionIdentifier.asString());
     }
 
-    public Storage getCommands() {
+    public Storage getCommandsMessages() {
         return commands;
+    }
+
+    private void setCommands() {
+        DynamicPlaceholdersCommand mainCommand = new DynamicPlaceholdersCommand(getCommandsMessages());
+        PlaceholdersAction actionCommand = new PlaceholdersAction(getCommandsMessages());
+        actionCommand.register(getName(), new CreatePlaceholder(this, getCommandsMessages()));
+
+        mainCommand.register(getName(), actionCommand);
+        mainCommand.register(getName(), new Reload(getCommandsMessages(), this));
+        Bukkit.getCommandMap().register(
+                getName(),
+                mainCommand
+        );
     }
 }

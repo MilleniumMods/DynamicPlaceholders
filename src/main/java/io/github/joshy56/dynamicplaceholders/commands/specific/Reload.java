@@ -1,8 +1,8 @@
 package io.github.joshy56.dynamicplaceholders.commands.specific;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.github.joshy56.dynamicplaceholders.DynamicPlaceholders;
-import io.github.joshy56.dynamicplaceholders.commands.CompoundCommand;
 import io.github.joshy56.dynamicplaceholders.commands.TranslatableCommand;
 import io.github.joshy56.dynamicplaceholders.commands.compounds.DynamicPlaceholdersCommand;
 import io.github.joshy56.dynamicplaceholders.util.Storage;
@@ -11,16 +11,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Created by joshy23 (justJoshy23 - joshy56) on 11/7/2022.
@@ -35,7 +33,7 @@ public class Reload extends TranslatableCommand {
                 Lists.newArrayList("recargar", "recharge"),
                 storage
         );
-        setPermission("dph.main.reload");
+        setPermission("dph.reload");
     }
 
     @Override
@@ -45,6 +43,10 @@ public class Reload extends TranslatableCommand {
 
     @Override
     protected boolean execute(@NotNull CommandSender sender) {
+        ConfigurationSection messages = getMessagesSection();
+        if(messages == null)
+            return false;
+
         Command command = Bukkit.getCommandMap().getCommand("dynamicplaceholders:dynamicplaceholders");
         if(command == null)
             return false;
@@ -60,15 +62,21 @@ public class Reload extends TranslatableCommand {
             return false;
 
         ((DynamicPlaceholdersCommand) command).reloadStorage();
-        ((DynamicPlaceholders) plugin).getCommands().reload();
+        ((DynamicPlaceholders) plugin).getCommandsMessages().reload();
+
+        String message = messages.getString("success");
+        if(Strings.isNullOrEmpty(message)) {
+            message = "%dynamicplaceholders:environmental_prefix% &a¡Todos los archivos recargados!";
+            messages.set("success", message);
+            getStorage().getStorage().set(messages.getName(), messages);
+            saveStorage();
+            getStoragePlugin().getSLF4JLogger().warn(String.format("Missing command message '%s' please configure it", messages.getCurrentPath() + "success"));
+        }
 
         sender.sendMessage(
                 ChatColor.translateAlternateColorCodes(
                         '&',
-                        Optional.ofNullable(getMessagesSection())
-                                .map(messages -> messages.getString("success"))
-                                .map(message -> PlaceholderAPI.setPlaceholders(null, message))
-                                .orElse("Se recargaron los mensajes c:")
+                        PlaceholderAPI.setPlaceholders(null, message)
                 )
         );
         return true;
