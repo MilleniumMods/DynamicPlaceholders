@@ -61,8 +61,11 @@ public class Reload extends TranslatableCommand {
         if(!plugin.isEnabled())
             return false;
 
+        DynamicPlaceholders dynamicPlaceholders = (DynamicPlaceholders) plugin;
         ((DynamicPlaceholdersCommand) command).reloadStorage();
-        ((DynamicPlaceholders) plugin).getCommandsMessages().reload();
+        dynamicPlaceholders.reloadConfig();
+        dynamicPlaceholders.getCommandsMessages().reload();
+        dynamicPlaceholders.getPlaceholderStorage().reload();
 
         String message = messages.getString("success");
         if(Strings.isNullOrEmpty(message)) {
