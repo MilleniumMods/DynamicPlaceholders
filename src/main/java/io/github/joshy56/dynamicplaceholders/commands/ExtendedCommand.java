@@ -73,9 +73,24 @@ public abstract class ExtendedCommand extends Command {
         return execute(sender, complexArgs);
     }
 
-    abstract protected boolean execute(@NotNull CommandSender sender, @NotNull List<String> args);
+    protected boolean execute(@NotNull CommandSender sender, @NotNull List<String> args) {
+        if(args.isEmpty())
+            return execute(sender);
+        return true;
+    }
 
-    abstract protected boolean execute(@NotNull CommandSender sender);
+    protected boolean execute(@NotNull CommandSender sender){
+        help(sender);
+        return true;
+    }
+
+    protected boolean help(@NotNull CommandSender sender, @NotNull List<String> args){
+        if(args.isEmpty())
+            return help(sender);
+        return true;
+    }
+
+    abstract protected boolean help(@NotNull CommandSender sender);
 
     @Override
     @Deprecated
