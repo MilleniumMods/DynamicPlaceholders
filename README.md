@@ -6,3 +6,6 @@ setup and installation guide...
 
 ## Contribute
 contribute guide...
+
+## How to use
+[Take a look to the wiki](https://github.com/joshy56/DynamicPlaceholders/wiki)
