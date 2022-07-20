@@ -7,12 +7,15 @@ import io.github.joshy56.dynamicplaceholders.commands.TranslatableCommand;
 import io.github.joshy56.dynamicplaceholders.commands.compounds.DynamicPlaceholdersCommand;
 import io.github.joshy56.dynamicplaceholders.util.Storage;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +33,7 @@ public class Reload extends TranslatableCommand {
                 "reload",
                 "Recarga los archivos de configuracion",
                 "/",
-                Lists.newArrayList("recargar", "recharge"),
+                Lists.newArrayList("recharge"),
                 storage
         );
         setPermission("dph.reload");
@@ -43,6 +46,9 @@ public class Reload extends TranslatableCommand {
 
     @Override
     protected boolean execute(@NotNull CommandSender sender) {
+        if(super.execute(sender))
+            return true;
+
         ConfigurationSection messages = getMessagesSection();
         if(messages == null)
             return false;
@@ -81,6 +87,26 @@ public class Reload extends TranslatableCommand {
                         '&',
                         PlaceholderAPI.setPlaceholders(null, message)
                 )
+        );
+        return true;
+    }
+
+    @Override
+    protected boolean help(@NotNull CommandSender sender) {
+        sender.sendMessage(
+                Component.text(
+                                ChatColor.translateAlternateColorCodes(
+                                        '&',
+                                        PlaceholderAPI.setPlaceholders(
+                                                ((sender instanceof Player) ? (Player) sender : null),
+                                                "%dynamicplaceholders:environmental_prefix% &6- &eComandos"
+                                        )
+                                )
+                        )
+                        .append(Component.newline())
+                        .append(Component.text(getName(), NamedTextColor.YELLOW))
+                        .append(Component.text(" >> ", NamedTextColor.GOLD))
+                        .append(Component.text(getDescription(), NamedTextColor.YELLOW))
         );
         return true;
     }

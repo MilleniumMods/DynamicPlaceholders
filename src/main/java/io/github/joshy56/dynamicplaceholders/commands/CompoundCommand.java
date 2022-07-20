@@ -3,16 +3,23 @@ package io.github.joshy56.dynamicplaceholders.commands;
 import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsManager;
 import io.github.joshy56.dynamicplaceholders.util.Storage;
+import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
+import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.naming.Name;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,8 +38,68 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
     protected boolean execute(@NotNull CommandSender sender, @NotNull List<String> args) {
         if (args.isEmpty())
             return execute(sender);
+        if (args.get(0).equalsIgnoreCase("help"))
+            return help(sender, args.subList(1, args.size()));
 
         return dispatch(sender, args);
+    }
+
+    @Override
+    protected boolean help(@NotNull CommandSender sender, @NotNull List<String> args) {
+        if (args.isEmpty())
+            return help(sender);
+
+        Command target = getCommand(args.get(0));
+        if (target == null)
+            return false;
+        if (!(target instanceof ExtendedCommand))
+            return false;
+
+        if (target.timings == null)
+            target.timings = TimingsManager.getCommandTiming(null, target);
+
+        try (Timing ignored = target.timings.startTiming()) {
+            ((ExtendedCommand) target).help(
+                    sender,
+                    args
+            );
+        }
+        return true;
+    }
+
+    @Override
+    protected boolean help(@NotNull CommandSender sender) {
+        sender.sendMessage(
+                Component.newline()
+                        .append(
+                                Component.text(
+                                        ChatColor.translateAlternateColorCodes(
+                                                '&',
+                                                PlaceholderAPI.setPlaceholders(
+                                                        ((sender instanceof Player) ? (Player) sender : null),
+                                                        "%dynamicplaceholders:environmental_prefix% &6- &eComandos"
+                                                )
+                                        )
+                                )
+                        )
+                        .append(Component.newline())
+                        .append(
+                                getKnownCommands()
+                                        .entrySet()
+                                        .stream()
+                                        .map(
+                                                entry -> Component.text()
+                                                        .append(Component.text(entry.getKey(), NamedTextColor.YELLOW))
+                                                        .append(Component.text(" >> ", NamedTextColor.GOLD))
+                                                        .append(Component.text(entry.getValue().getDescription(), NamedTextColor.YELLOW))
+                                                        .build()
+                                        )
+                                        .collect(Component.toComponent(Component.newline()))
+                        )
+                        .append(Component.newline())
+                        .append(Component.text("   >", NamedTextColor.YELLOW, TextDecoration.STRIKETHROUGH))
+        );
+        return true;
     }
 
     @Override

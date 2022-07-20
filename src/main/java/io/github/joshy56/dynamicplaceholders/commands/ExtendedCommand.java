@@ -23,8 +23,8 @@ public abstract class ExtendedCommand extends Command {
     private static final VarHandle handle;
 
     /**
-     * Pattern that match on single word, double-quoted phrase, phrase single-quoted and word with apostrophe.
-     * <ul>
+     * Pattern which function is look for single word, phrase double-quoted, phrase single-quoted and word with apostrophe.
+     * <ul> For example...
      *     <li>Single word: word</li>
      *     <li>Phrase double-quoted: "another double-quoted phrase"</li>
      *     <li>Phrase single-quoted: 'another single-quoted phrase'</li>
@@ -74,20 +74,27 @@ public abstract class ExtendedCommand extends Command {
     }
 
     protected boolean execute(@NotNull CommandSender sender, @NotNull List<String> args) {
+        if(!isRegistered())
+            return false;
+
         if(args.isEmpty())
             return execute(sender);
-        return true;
+
+        if(args.get(0).equalsIgnoreCase("help"))
+            return help(sender, args.subList(1, args.size()));
+
+        return false;
     }
 
     protected boolean execute(@NotNull CommandSender sender){
-        help(sender);
-        return true;
+        return help(sender);
     }
 
     protected boolean help(@NotNull CommandSender sender, @NotNull List<String> args){
         if(args.isEmpty())
             return help(sender);
-        return true;
+
+        return false;
     }
 
     abstract protected boolean help(@NotNull CommandSender sender);

@@ -17,6 +17,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,16 +40,17 @@ public class CreatePlaceholder extends TranslatableCommand {
 
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull List<String> args) {
-        if (!isRegistered())
-            return false;
+        if(super.execute(sender, args))
+            return true;
+
         ConfigurationSection messages = getMessagesSection();
-        if(messages == null)
+        if (messages == null)
             return false;
 
         String message;
         if (args.size() < 1) {
             message = messages.getString("error.missed-placeholder-id");
-            if(Strings.isNullOrEmpty(message)) {
+            if (Strings.isNullOrEmpty(message)) {
                 message = "%dynamicplaceholders:environmental_prefix% &cEspecifica que id debe tener este placeholder...";
                 messages.set("error.missed-placeholder-id", message);
                 getStorage().getStorage().set(messages.getName(), messages);
@@ -67,7 +69,7 @@ public class CreatePlaceholder extends TranslatableCommand {
 
         if (args.size() < 2) {
             message = messages.getString("error.missed-placeholder-value");
-            if(Strings.isNullOrEmpty(message)) {
+            if (Strings.isNullOrEmpty(message)) {
                 message = "%dynamicplaceholders:environmental_prefix% &cEspecifica que valor debe tener este placeholder...";
                 messages.set("error.missed-placeholder-value", message);
                 getStorage().getStorage().set(messages.getName(), messages);
@@ -93,7 +95,7 @@ public class CreatePlaceholder extends TranslatableCommand {
         );
 
         message = messages.getString("success");
-        if(Strings.isNullOrEmpty(message)) {
+        if (Strings.isNullOrEmpty(message)) {
             message = "%dynamicplaceholders:environmental_prefix% &a¡Placeholder creado! ID: '&2" + identifier + "&a' Valor: '&2" + value + "&a'";
             messages.set("success", message);
             getStorage().getStorage().set(messages.getName(), messages);
@@ -107,12 +109,37 @@ public class CreatePlaceholder extends TranslatableCommand {
                         PlaceholderAPI.setPlaceholders(null, message)
                 )
         );
+
         return true;
     }
 
     @Override
-    protected boolean execute(@NotNull CommandSender sender) {
-        return false;
+    protected boolean help(@NotNull CommandSender sender, @NotNull List<String> args) {
+        return super.help(sender, args); //To do: Return help for the unique two args...
+    }
+
+    @Override
+    protected boolean help(@NotNull CommandSender sender) {
+        sender.sendMessage("aa");
+        sender.sendMessage(
+                Component.newline()
+                        .append(
+                                Component.text(
+                                        ChatColor.translateAlternateColorCodes(
+                                                '&',
+                                                PlaceholderAPI.setPlaceholders(
+                                                        ((sender instanceof Player) ? (Player) sender : null),
+                                                        "%dynamicplaceholders:environmental_prefix% &6- &eComandos"
+                                                )
+                                        )
+                                )
+                        )
+                        .append(Component.newline())
+                        .append(Component.text(getName(), NamedTextColor.YELLOW))
+                        .append(Component.text(" >> ", NamedTextColor.GOLD))
+                        .append(Component.text(getDescription(), NamedTextColor.YELLOW))
+        );
+        return true;
     }
 
     @Override
