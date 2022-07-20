@@ -87,6 +87,9 @@ public abstract class CompoundCommand extends TranslatableCommand implements Com
                                 getKnownCommands()
                                         .entrySet()
                                         .stream()
+                                        .filter(
+                                                entry -> entry.getValue().getName().equalsIgnoreCase(entry.getKey())
+                                        )
                                         .map(
                                                 entry -> Component.text()
                                                         .append(Component.text(entry.getKey(), NamedTextColor.YELLOW))
