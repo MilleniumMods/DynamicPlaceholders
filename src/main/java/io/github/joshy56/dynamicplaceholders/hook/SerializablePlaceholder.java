@@ -2,7 +2,6 @@ package io.github.joshy56.dynamicplaceholders.hook;
 
 import com.google.common.base.Preconditions;
 import io.github.joshy56.dynamicplaceholders.exceptions.InvalidPlaceholderExpansion;
-import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.PlaceholderHook;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -17,18 +16,18 @@ import java.util.Map;
  * Created by joshy23 (justJoshy23 - joshy56) on 14/6/2022.
  */
 @SerializableAs("SerializablePlaceholder")
-public class SerializablePlaceholder extends PlaceholderHook implements ConfigurationSerializable {
-    private String value;
+public class SerializablePlaceholder<T> extends PlaceholderHook implements ConfigurationSerializable {
+    private T value;
 
-    public SerializablePlaceholder(@NotNull final String value) {
+    public SerializablePlaceholder(@NotNull final T value) {
         setValue(value);
     }
 
-    public @NotNull String getValue() {
+    public @NotNull T getValue() {
         return value;
     }
 
-    public SerializablePlaceholder setValue(@NotNull final String value) {
+    public SerializablePlaceholder<T> setValue(@NotNull final T value) {
         this.value = Preconditions.checkNotNull(
                 value,
                 "Please, choose a not-null value..."
@@ -39,7 +38,7 @@ public class SerializablePlaceholder extends PlaceholderHook implements Configur
     @Override
     public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
         /*return PlaceholderAPI.setPlaceholders(player, getValue());*/
-        return getValue();
+        return String.valueOf(value);
     }
 
     @Override
@@ -49,15 +48,15 @@ public class SerializablePlaceholder extends PlaceholderHook implements Configur
         return args;
     }
 
-    public static SerializablePlaceholder deserialize(@NotNull final Map<String, Object> args) throws InvalidPlaceholderExpansion {
-        String value;
+    public static SerializablePlaceholder<?> deserialize(@NotNull final Map<String, Object> args) throws InvalidPlaceholderExpansion {
+        Object value;
         try{
-            value = args.get("value").toString();
+            value = args.get("value");
         } catch (NullPointerException e) {
             throw new InvalidPlaceholderExpansion("value is not defined", e);
         } catch (ClassCastException e) {
             throw new InvalidPlaceholderExpansion("value is of wrong type", e);
         }
-        return new SerializablePlaceholder(value);
+        return new SerializablePlaceholder<>(value);
     }
 }

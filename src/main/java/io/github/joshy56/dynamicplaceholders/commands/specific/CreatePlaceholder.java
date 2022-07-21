@@ -32,7 +32,7 @@ public class CreatePlaceholder extends TranslatableCommand {
     private final DynamicPlaceholders plugin;
 
     public CreatePlaceholder(@NotNull final DynamicPlaceholders plugin, @NotNull final Storage storage) {
-        super("create", "Crea un placeholder", "<nombre> <valor>", Lists.newArrayList("add", "new"), storage);
+        super("create", "Crea un placeholder", "<nombre> <valor>", Lists.newArrayList("new"), storage);
         this.plugin = plugin;
         setPermission("dph.create");
         getMessagesSection();
@@ -91,7 +91,7 @@ public class CreatePlaceholder extends TranslatableCommand {
         plugin.getPlaceholderStorage().addPlaceholder(
                 plugin.getOwnExpansion().getIdentifier(),
                 identifier,
-                new SerializablePlaceholder(value)
+                new SerializablePlaceholder<>(value)
         );
 
         message = messages.getString("success");
