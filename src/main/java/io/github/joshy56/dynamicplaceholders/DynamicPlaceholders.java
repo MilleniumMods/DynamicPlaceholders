@@ -1,7 +1,7 @@
 package io.github.joshy56.dynamicplaceholders;
 
 import io.github.joshy56.dynamicplaceholders.commands.compounds.PlaceholdersAction;
-import io.github.joshy56.dynamicplaceholders.commands.specific.CreatePlaceholder;
+import io.github.joshy56.dynamicplaceholders.commands.specific.CreateLocal;
 import io.github.joshy56.dynamicplaceholders.commands.compounds.DynamicPlaceholdersCommand;
 import io.github.joshy56.dynamicplaceholders.commands.specific.Reload;
 import io.github.joshy56.dynamicplaceholders.hook.PlaceholderStorage;
@@ -82,7 +82,7 @@ public class DynamicPlaceholders extends JavaPlugin {
     private void setCommands() {
         DynamicPlaceholdersCommand mainCommand = new DynamicPlaceholdersCommand(getCommandsMessages());
         PlaceholdersAction actionCommand = new PlaceholdersAction(getCommandsMessages());
-        actionCommand.register(getName(), new CreatePlaceholder(this, getCommandsMessages()));
+        actionCommand.register(getName(), new CreateLocal(this, getCommandsMessages()));
 
         mainCommand.register(getName(), actionCommand);
         mainCommand.register(getName(), new Reload(getCommandsMessages(), this));

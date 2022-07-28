@@ -7,7 +7,11 @@ create:
     missed_value: "%dynamicplaceholders:environmental_prefix% &cYou missed the placeholder value"
   success: "%dynamicplaceholders:environmental_prefix% &aPlaceholder successfully created with the ID: '%placeholder-id%' and '%placeholder-value%' as his value"
 remove:
+  help: "%dynamicplaceholders:environmental_prefix% &eRemove a placeholder from the storage"
   error:
-    missed_id: "%dynamicplaceholders_prefix% &cYou missed"
+    missed_id: "%dynamicplaceholders:environmental_prefix% &cYou missed the placeholder id"
+    placeholder_already_removed: "%dynamicplaceholders:environmental_prefix% &cThis placeholder is already removed (Possible concurrent operation error)"
+    placeholder_not_found: "%dynamicplaceholders:environmental_prefix% &cPlaceholder doesn't exists"
+  success: "%dynamicplaceholders:environmental_prefix% &aPlaceholder successfully removed"
 reload:
   success: "%dynamicplaceholders:environmental_prefix% &aAll configs files are reloaded"

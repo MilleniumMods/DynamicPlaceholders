@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -35,10 +36,14 @@ public class SerializablePlaceholder<T> extends PlaceholderHook implements Confi
         return this;
     }
 
+    public String getValueAsString(){
+        return String.valueOf(getValue());
+    }
+
     @Override
     public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
         /*return PlaceholderAPI.setPlaceholders(player, getValue());*/
-        return String.valueOf(value);
+        return getValueAsString();
     }
 
     @Override

@@ -6,35 +6,30 @@ import io.github.joshy56.dynamicplaceholders.DynamicPlaceholders;
 import io.github.joshy56.dynamicplaceholders.commands.TranslatableCommand;
 import io.github.joshy56.dynamicplaceholders.hook.SerializablePlaceholder;
 import io.github.joshy56.dynamicplaceholders.util.Storage;
-import io.papermc.paper.text.PaperComponents;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Created by joshy23 (justJoshy23 - joshy56) on 14/6/2022.
  */
-public class CreatePlaceholder extends TranslatableCommand {
+public class CreateLocal extends TranslatableCommand {
     private final DynamicPlaceholders plugin;
 
-    public CreatePlaceholder(@NotNull final DynamicPlaceholders plugin, @NotNull final Storage storage) {
-        super("create", "Crea un placeholder", "<nombre> <valor>", Lists.newArrayList("new"), storage);
+    public CreateLocal(@NotNull final DynamicPlaceholders plugin, @NotNull final Storage storage) {
+        super("local", "Crea un placeholder", "<name> <value>", Lists.newArrayList("new"), storage);
         this.plugin = plugin;
-        setPermission("dph.create");
+        setPermission("dph.create-local");
         getMessagesSection();
     }
 

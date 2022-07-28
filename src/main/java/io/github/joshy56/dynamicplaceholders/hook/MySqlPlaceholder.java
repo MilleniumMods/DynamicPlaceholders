@@ -10,4 +10,6 @@ public class MySqlPlaceholder extends SerializablePlaceholder {
     public MySqlPlaceholder(@NotNull String value) {
         super(value);
     }
+
+    public static class Builder {}
 }
