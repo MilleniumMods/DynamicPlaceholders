@@ -1,9 +1,12 @@
 package io.github.joshy56.dynamicplaceholders;
 
+import io.github.joshy56.dynamicplaceholders.commands.compounds.Create;
 import io.github.joshy56.dynamicplaceholders.commands.compounds.PlaceholdersAction;
 import io.github.joshy56.dynamicplaceholders.commands.specific.CreateLocal;
 import io.github.joshy56.dynamicplaceholders.commands.compounds.DynamicPlaceholdersCommand;
+import io.github.joshy56.dynamicplaceholders.commands.specific.CreateRemote;
 import io.github.joshy56.dynamicplaceholders.commands.specific.Reload;
+import io.github.joshy56.dynamicplaceholders.commands.specific.Remove;
 import io.github.joshy56.dynamicplaceholders.hook.PlaceholderStorage;
 import io.github.joshy56.dynamicplaceholders.hook.PluginPlaceholderExpansion;
 import io.github.joshy56.dynamicplaceholders.hook.SerializablePlaceholder;
@@ -82,7 +85,12 @@ public class DynamicPlaceholders extends JavaPlugin {
     private void setCommands() {
         DynamicPlaceholdersCommand mainCommand = new DynamicPlaceholdersCommand(getCommandsMessages());
         PlaceholdersAction actionCommand = new PlaceholdersAction(getCommandsMessages());
-        actionCommand.register(getName(), new CreateLocal(this, getCommandsMessages()));
+        Create createCommand = new Create(getCommandsMessages());
+        createCommand.register(getName(), new CreateLocal(this, getCommandsMessages()));
+        createCommand.register(getName(), new CreateRemote(getCommandsMessages()));
+
+        actionCommand.register(getName(), createCommand);
+        actionCommand.register(getName(), new Remove(getCommandsMessages(), this));
 
         mainCommand.register(getName(), actionCommand);
         mainCommand.register(getName(), new Reload(getCommandsMessages(), this));
