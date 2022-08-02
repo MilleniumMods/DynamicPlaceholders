@@ -20,6 +20,8 @@ import java.util.Map;
 public class SerializablePlaceholder<T> extends PlaceholderHook implements ConfigurationSerializable {
     private T value;
 
+    public SerializablePlaceholder(){}
+
     public SerializablePlaceholder(@NotNull final T value) {
         setValue(value);
     }
@@ -41,7 +43,7 @@ public class SerializablePlaceholder<T> extends PlaceholderHook implements Confi
     }
 
     @Override
-    public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
+    public @Nullable String onPlaceholderRequest(@Nullable Player player, @NotNull String params) {
         /*return PlaceholderAPI.setPlaceholders(player, getValue());*/
         return getValueAsString();
     }
