@@ -11,6 +11,8 @@ import io.github.joshy56.dynamicplaceholders.hook.PlaceholderStorage;
 import io.github.joshy56.dynamicplaceholders.hook.PluginPlaceholderExpansion;
 import io.github.joshy56.dynamicplaceholders.hook.SerializablePlaceholder;
 import io.github.joshy56.dynamicplaceholders.util.Storage;
+import me.clip.placeholderapi.PlaceholderAPI;
+import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.libs.kyori.adventure.platform.bukkit.BukkitAudiences;
 import me.clip.placeholderapi.libs.kyori.adventure.text.Component;
 import me.clip.placeholderapi.libs.kyori.adventure.text.format.NamedTextColor;

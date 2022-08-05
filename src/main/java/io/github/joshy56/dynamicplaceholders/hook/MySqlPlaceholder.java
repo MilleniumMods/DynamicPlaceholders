@@ -70,6 +70,7 @@ public class MySqlPlaceholder extends SerializablePlaceholder {
     @Override
     @NotNull
     public Map<String, Object> serialize() {
+
         return null;
     }
 
