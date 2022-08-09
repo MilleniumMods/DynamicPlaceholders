@@ -35,6 +35,7 @@ public class MariaDbExpansion extends SerializableExpansion implements Taskable 
   private BukkitTask fetcher;
   private Object value;
 
+  // To a future: Maybe implement 'Builder Pattern' to make more flexible and beauty instantiation of this class
   public MariaDbExpansion(
       @NotNull final Plugin requiredPlugin,
       @NotNull String identifier,
