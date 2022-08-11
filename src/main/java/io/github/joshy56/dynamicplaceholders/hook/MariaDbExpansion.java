@@ -35,7 +35,8 @@ public class MariaDbExpansion extends SerializableExpansion implements Taskable 
   private BukkitTask fetcher;
   private Object value;
 
-  // To a future: Maybe implement 'Builder Pattern' to make more flexible and beauty instantiation of this class
+  // To a future: Maybe implement 'Builder Pattern' to make more flexible and beauty instantiation
+  // of this class
   public MariaDbExpansion(
       @NotNull final Plugin requiredPlugin,
       @NotNull String identifier,
@@ -89,8 +90,7 @@ public class MariaDbExpansion extends SerializableExpansion implements Taskable 
   }
 
   @Override
-  public @Nullable String onPlaceholderRequest(
-      @Nullable final Player player, @NotNull String params) {
+  public @Nullable String onPlaceholderRequest(@Nullable Player player, @NotNull String params) {
     return String.valueOf(value);
   }
 

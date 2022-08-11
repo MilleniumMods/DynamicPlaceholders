@@ -2,10 +2,14 @@ package io.github.joshy56.dynamicplaceholders.hook;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import io.github.joshy56.dynamicplaceholders.DynamicPlaceholders;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,6 +22,7 @@ import java.util.Optional;
  */
 public class PlaceholderStorage {
     private final Map<String, PluginPlaceholderExpansion> expansions;
+    private final Multimap<Plugin, SerializableExpansion> expansionMultimap;
     private final DynamicPlaceholders plugin;
 
     public PlaceholderStorage(@NotNull final DynamicPlaceholders plugin, @Nullable final Map<String, PluginPlaceholderExpansion> defaults) {
@@ -28,6 +33,7 @@ public class PlaceholderStorage {
         expansions = new HashMap<>();
         if(defaults != null)
             expansions.putAll(defaults);
+        expansionMultimap = HashMultimap.create();
     }
 
     public PlaceholderStorage reload(){
