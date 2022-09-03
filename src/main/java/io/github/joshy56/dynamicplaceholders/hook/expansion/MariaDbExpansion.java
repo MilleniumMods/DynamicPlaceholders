@@ -1,22 +1,22 @@
-package io.github.joshy56.dynamicplaceholders.hook;
+package io.github.joshy56.dynamicplaceholders.hook.expansion;
 
+import io.github.joshy56.dynamicplaceholders.hook.SerializableExpansion;
 import me.clip.placeholderapi.expansion.Taskable;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mariadb.jdbc.MariaDbDataSource;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 /** Created by joshy23 (justJoshy23 - joshy56) on 4/8/2022. */
 @SerializableAs("MariaDbExpansion")
@@ -32,12 +32,12 @@ public class MariaDbExpansion extends SerializableExpansion implements Taskable 
   private final int rowNumber;
 
   private MariaDbDataSource dataSource;
-  private BukkitTask fetcher;
+  private Connection connection;
   private Object value;
 
   // To a future: Maybe implement 'Builder Pattern' to make more flexible and beauty instantiation
   // of this class
-  public MariaDbExpansion(
+  protected MariaDbExpansion(
       @NotNull final Plugin requiredPlugin,
       @NotNull String identifier,
       @NotNull String url,
@@ -164,42 +164,59 @@ public class MariaDbExpansion extends SerializableExpansion implements Taskable 
 
   @Override
   public void start() {
-    if (!fetcher.isCancelled()) return;
+    try {
+      if (connection != null && !connection.isClosed()) return;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
 
     try {
       dataSource =
           new MariaDbDataSource(
               String.format(
                   "jdbc:mariadb://%s/%s?user=%s&password=%s", url, database, username, password));
-      fetcher =
-          Bukkit.getScheduler()
-              .runTaskTimerAsynchronously(
-                  getPluginInstance(getRequiredPlugin()),
-                  () -> {
-                    try (PreparedStatement preparedStatement =
-                        dataSource.getConnection().prepareStatement("SELECT ? FROM ?;")) {
-                      preparedStatement.setString(1, columnIdentifier);
-                      preparedStatement.setString(2, tableIdentifier);
-                      ResultSet resultSet = preparedStatement.executeQuery();
-                      while (resultSet.next()) {
-                        if (resultSet.getRow() == rowNumber) {
-                          value = resultSet.getString(columnIdentifier);
-                          break;
-                        }
-                      }
-                    } catch (SQLException e) {
-                      throw new RuntimeException(e);
-                    }
-                  },
-                  1,
-                  Math.max(10, new Random().nextInt(19)));
+      connection = dataSource.getConnection();
+      fetch();
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
   }
 
+  private void fetch() throws SQLException {
+    if(connection == null || connection.isClosed())
+      return;
+
+    Bukkit.getScheduler()
+            .runTaskLaterAsynchronously(
+                    getPluginInstance(getRequiredPlugin()),
+                    () -> {
+                      try(PreparedStatement statement = connection.prepareStatement("SELECT ? FROM ?;")) {
+                        statement.setString(1, columnIdentifier);
+                        statement.setString(2, tableIdentifier);
+                        ResultSet resultSet = statement.executeQuery();
+                        while (resultSet.next()) {
+                          if (resultSet.getRow() == rowNumber) {
+                            value = resultSet.getString(columnIdentifier);
+                            break;
+                          }
+                        }
+                        resultSet.close();
+                        fetch();
+                      } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                      }
+                    },
+                    (long) ((Math.random() * 19) + 1)
+            );
+
+  }
+
   @Override
   public void stop() {
-    if (fetcher != null && !fetcher.isCancelled()) fetcher.cancel();
+    try {
+      if (connection != null && !connection.isClosed()) connection.close();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
